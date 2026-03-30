@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% block body_class %}bg-admin{% endblock %}
+{% block content %}
+<div class="page-header animate-fade-in">
+  <h1 class="page-title">Admin Dashboard</h1>
+  <p class="page-subtitle">Manage users, faculty assignments, and system overview</p>
+</div>
+
+<div class="stats-grid animate-fade-in">
+  <div class="stat-card">
+    <div class="stat-icon primary">👥</div>
+    <div class="stat-content">
+      <h3>{{ users|length }}</h3>
+      <p>Total Users</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon success">👨‍🏫</div>
+    <div class="stat-content">
+      <h3>{{ users|selectattr('role', 'equalto', 'faculty')|list|length }}</h3>
+      <p>Faculty Members</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon info">👨‍🎓</div>
+    <div class="stat-content">
+      <h3>{{ users|selectattr('role', 'equalto', 'student')|list|length }}</h3>
+      <p>Students</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon warning"></div>
+    <div class="stat-content">
+      <h3>{{ projects|length }}</h3>
+      <p>Total Projects</p>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2 animate-fade-in">
+  <div class="card">
+    <div class="card-header">
+      <h2>👥 User Management</h2>
+    </div>
+    <div class="card-body">
+      <p class="mb-3">Create and manage all system users including students, faculty, and administrators.</p>
+      <a href="/admin/users" class="btn btn-primary">
+        <span>👥</span> Manage Users
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>📊 Analytics Overview</h2>
+    </div>
+    <div class="card-body">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-content">
+            <h3>{{ projects|selectattr('status', 'equalto', 'Pending')|list|length }}</h3>
+            <p>Pending Reviews</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-content">
+            <h3>{{ projects|selectattr('status', 'equalto', 'Approved')|list|length }}</h3>
+            <p>Approved</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-content">
+            <h3>{{ projects|selectattr('status', 'equalto', 'Rejected')|list|length }}</h3>
+            <p>Rejected</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-content">
+            <h3>{{ projects|selectattr('status', 'equalto', 'Needs Revision')|list|length }}</h3>
+            <p>Needs Revision</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-4 animate-fade-in">
+  <div class="card-header">
+    <h2>👨‍🏫 Faculty-Student Assignment</h2>
+  </div>
+  <div class="card-body">
+    <p class="mb-3">Assign students to faculty members for project guidance and review. Faculty members can only review projects of assigned students.</p>
+    <form action="/admin/assign-student" method="POST" class="assign-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="faculty">Select Faculty</label>
+          <select id="faculty" name="faculty_id" class="form-select" required>
+            <option value="">Choose Faculty...</option>
+            {% for user in users if user.role == 'faculty' %}
+              <option value="{{ user._id }}">{{ user.name }} ({{ user.email }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="student">Select Student</label>
+          <select id="student" name="student_id" class="form-select" required>
+            <option value="">Choose Student...</option>
+            {% for user in users if user.role == 'student' %}
+              <option value="{{ user._id }}">{{ user.name }} ({{ user.email }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="display: flex; align-items: flex-end;">
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            <span>➕</span> Assign Student
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <h3 class="mt-4 mb-2">Current Assignments</h3>
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Faculty</th>
+            <th>Assigned Students</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users if user.role == 'faculty' %}
+            <tr>
+              <td><strong>{{ user.name }}</strong><br><small>{{ user.email }}</small></td>
+              <td>
+                {% if user.assigned_students %}
+                  {% set student_ids = user.assigned_students %}
+                  {% set assigned_names = [] %}
+                  {% for student_user in users %}
+                    {% if student_user._id in student_ids %}
+                      {% if assigned_names.append(student_user.name) %}{% endif %}
+                    {% endif %}
+                  {% endfor %}
+                  {{ assigned_names|join(', ') }}
+                {% else %}
+                  <span class="text-muted">No students assigned</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="/admin/edit-assignment/{{ user._id }}" class="btn btn-sm btn-secondary">
+                  <span>✏️</span> Edit
+                </a>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="3" class="text-center">
+                <div class="empty-state">
+                  <div class="empty-state-icon">👨‍🏫</div>
+                  <h3>No Faculty Members</h3>
+                  <p>Add faculty members to assign students.</p>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-4 animate-fade-in">
+  <div class="card-header">
+    <h2>📋 Project Status Summary</h2>
+  </div>
+  <div class="card-body">
+    <div class="progress-stats">
+      {% set total = projects|length %}
+      {% if total > 0 %}
+        {% set approved = projects|selectattr('status', 'equalto', 'Approved')|list|length %}
+        {% set rejected = projects|selectattr('status', 'equalto', 'Rejected')|list|length %}
+        {% set pending = projects|selectattr('status', 'equalto', 'Pending')|list|length %}
+        {% set revision = projects|selectattr('status', 'equalto', 'Needs Revision')|list|length %}
+        
+        <div class="progress-bar-container">
+          <div class="progress-label">
+            <span>Approved</span>
+            <span>{{ approved }} ({{ (approved/total*100)|round|int }}%)</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill bg-success" style="width: {{ (approved/total*100)|round|int }}%"></div>
+          </div>
+        </div>
+        
+        <div class="progress-bar-container">
+          <div class="progress-label">
+            <span>Pending Review</span>
+            <span>{{ pending }} ({{ (pending/total*100)|round|int }}%)</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill bg-info" style="width: {{ (pending/total*100)|round|int }}%"></div>
+          </div>
+        </div>
+        
+        <div class="progress-bar-container">
+          <div class="progress-label">
+            <span>Needs Revision</span>
+            <span>{{ revision }} ({{ (revision/total*100)|round|int }}%)</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill bg-warning" style="width: {{ (revision/total*100)|round|int }}%"></div>
+          </div>
+        </div>
+        
+        <div class="progress-bar-container">
+          <div class="progress-label">
+            <span>Rejected</span>
+            <span>{{ rejected }} ({{ (rejected/total*100)|round|int }}%)</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill bg-danger" style="width: {{ (rejected/total*100)|round|int }}%"></div>
+          </div>
+        </div>
+      {% else %}
+        <p class="text-center text-muted">No projects submitted yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

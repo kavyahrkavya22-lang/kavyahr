@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header animate-fade-in">
+  <h1 class="page-title">Review Project</h1>
+  <p class="page-subtitle">Evaluate and provide feedback on student submissions</p>
+</div>
+
+<div class="card animate-fade-in">
+  <div class="card-header">
+    <h2>{{ proj.title }}</h2>
+    <span class="badge {% if proj.status == 'Approved' %}badge-success{% elif proj.status == 'Rejected' %}badge-danger{% elif proj.status == 'Needs Revision' %}badge-warning{% else %}badge-info{% endif %}">{{ proj.status }}</span>
+  </div>
+  <div class="card-body">
+    <div class="stats-grid mb-4">
+      <div class="stat-card">
+        <div class="stat-content">
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Student Name</p>
+          <h3 style="font-size: 1rem;">{{ proj.student_name }}</h3>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-content">
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Register Number</p>
+          <h3 style="font-size: 1rem;">{{ proj.register_number }}</h3>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-content">
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Course</p>
+          <h3 style="font-size: 1rem;">{{ proj.course }}</h3>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-content">
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Guide</p>
+          <h3 style="font-size: 1rem;">{{ proj.guide or 'Not Assigned' }}</h3>
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <div style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius);">
+        {{ proj.description }}
+      </div>
+    </div>
+    
+    {% if proj.technology %}
+    <div class="form-group mt-3">
+      <label class="form-label">Technology Stack</label>
+      <div style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius);">
+        {{ proj.technology }}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if proj.project_file %}
+    <div class="form-group mt-3">
+      <label class="form-label">
+        <span>📁</span> Project File
+      </label>
+      <div class="file-download-card">
+        <div class="file-icon-large">
+          {% set ext = proj.original_filename.split('.')[-1].lower() if proj.original_filename else 'file' %}
+          {% if ext in ['zip', 'rar'] %}📦
+          {% elif ext == 'pdf' %}📄
+          {% elif ext in ['doc', 'docx'] %}📝
+          {% elif ext in ['ppt', 'pptx'] %}📊
+          {% elif ext in ['xls', 'xlsx'] %}📈
+          {% else %}📁{% endif %}
+        </div>
+        <div class="file-details">
+          <h4>{{ proj.original_filename or 'Project File' }}</h4>
+          <p>Click to download the submitted project file</p>
+        </div>
+        <a href="{{ proj.project_file }}" class="btn btn-download" download target="_blank">
+          <span>⬇️</span> Download
+        </a>
+      </div>
+    </div>
+    {% endif %}
+    
+    <form method="post">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="status">Status</label>
+          <select id="status" name="status" class="form-select" required>
+            <option value="Approved" {% if proj.status == 'Approved' %}selected{% endif %}>Approved</option>
+            <option value="Rejected" {% if proj.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+            <option value="Needs Revision" {% if proj.status == 'Needs Revision' %}selected{% endif %}>Needs Revision</option>
+            <option value="Pending" {% if proj.status == 'Pending' %}selected{% endif %}>Pending</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="marks">Marks (0-100)</label>
+          <input type="number" id="marks" name="marks" class="form-input" min="0" max="100" value="{{ proj.marks or '' }}" placeholder="Enter marks">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="feedback">Feedback</label>
+        <textarea id="feedback" name="feedback" class="form-textarea" placeholder="Provide constructive feedback for the student...">{{ proj.feedback or '' }}</textarea>
+        <p class="form-hint">Your feedback will help students improve their work.</p>
+      </div>
+      <div class="d-flex gap-2 mt-3">
+        <button type="submit" class="btn btn-primary">
+          <span>💾</span> Save Review
+        </button>
+        <a href="/dashboard" class="btn btn-secondary">
+          <span>←</span> Back to Dashboard
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .file-download-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+    padding: 20px;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--primary);
+  }
+
+  .file-icon-large {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary), #6366f1);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+
+  .file-details {
+    flex: 1;
+  }
+
+  .file-details h4 {
+    color: var(--text-primary);
+    margin: 0 0 4px;
+    font-size: 1rem;
+  }
+
+  .file-details p {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 0.85rem;
+  }
+
+  .btn-download {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--primary), #6366f1);
+    color: white;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-download:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+    color: white;
+  }
+</style>
+{% endblock %}

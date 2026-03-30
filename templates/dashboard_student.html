@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block body_class %}bg-student{% endblock %}
+{% block content %}
+<div class="page-header animate-fade-in">
+  <h1 class="page-title">Student Dashboard</h1>
+  <p class="page-subtitle">Submit and track your project submissions</p>
+</div>
+
+<div class="card animate-fade-in">
+  <div class="card-header">
+    <h2>Submit New Project</h2>
+  </div>
+  <div class="card-body">
+    <p class="mb-3">Submit your project details for review by your assigned faculty guide.</p>
+    <a href="/submit" class="btn btn-primary">
+      <span>➕</span> Submit New Project
+    </a>
+  </div>
+</div>
+
+<div class="card mt-4 animate-fade-in">
+  <div class="card-header">
+    <h2>Your Submission Status</h2>
+  </div>
+  <div class="card-body">
+    {% if projects %}
+      {% set latest_project = projects[-1] %}
+      <div class="stats-grid mb-4">
+        <div class="stat-card">
+          <div class="stat-content">
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Latest Submission</p>
+            <h3 style="font-size: 1rem;">{{ latest_project.title }}</h3>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-content">
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Status</p>
+            <span class="badge {% if latest_project.status == 'Approved' %}badge-success{% elif latest_project.status == 'Rejected' %}badge-danger{% elif latest_project.status == 'Needs Revision' %}badge-warning{% else %}badge-info{% endif %}">
+              {{ latest_project.status }}
+            </span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-content">
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Course</p>
+            <h3 style="font-size: 1rem;">{{ latest_project.course }}</h3>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-content">
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Submitted On</p>
+            <h3 style="font-size: 1rem;">{{ latest_project._id.generation_time.strftime('%Y-%m-%d') }}</h3>
+          </div>
+        </div>
+        {% if latest_project.project_file %}
+        <div class="stat-card">
+          <div class="stat-content">
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Project File</p>
+            <a href="{{ latest_project.project_file }}" class="btn btn-sm btn-primary" download target="_blank">
+              <span>⬇️</span> Download
+            </a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      <p class="text-muted text-center">
+        Your project details (register number, course, project title, technology, guide, status, marks, feedback) are visible to your assigned faculty for review.
+      </p>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <h3>No Submissions Yet</h3>
+        <p>You haven't submitted any projects yet.</p>
+        <a href="/submit" class="btn btn-primary">Submit Your First Project</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

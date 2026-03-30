@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SPMS - Student Project Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+  </head>
+  <body class="{% block body_class %}{% endblock %}">
+    <header class="header">
+      <div class="header-inner">
+        <a href="/" class="logo">
+          <div class="logo-icon">📚</div>
+          <span>SPMS</span>
+        </a>
+        <button class="nav-toggle" aria-label="Toggle navigation">☰</button>
+        <nav class="nav">
+          <a href="/" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+            <span>🏠</span> Home
+          </a>
+          {% if session.user_id %}
+          <a href="/dashboard" class="nav-link {% if request.endpoint and 'dashboard' in request.endpoint %}active{% endif %}">
+            <span>📊</span> Dashboard
+          </a>
+          <a href="/profile" class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}">
+            <span>👤</span> Profile
+          </a>
+          <a href="/logout" class="nav-link">
+            <span>🚪</span> Logout
+          </a>
+          {% else %}
+          <a href="/login" class="nav-link {% if request.endpoint == 'login' %}active{% endif %}">
+            <span>🔐</span> Login
+          </a>
+          {% endif %}
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle Dark Mode">🌙</button>
+        </nav>
+      </div>
+    </header>
+    <main class="main-container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="alerts">
+          {% for category, msg in messages %}
+            <div class="alert alert-{{ category }}">
+              <span>{% if category == 'success' %}✓{% elif category == 'danger' %}✕{% elif category == 'warning' %}⚠{% else %}ℹ{% endif %}</span>
+              {{ msg }}
+            </div>
+          {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+    <script src="/static/js/app.js"></script>
+  </body>
+</html>

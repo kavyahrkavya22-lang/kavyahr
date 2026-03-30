@@ -1,0 +1,808 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header animate-fade-in">
+  <h1 class="page-title">🚀 Submit Your Project</h1>
+  <p class="page-subtitle">Upload your project work and share it with your faculty for review</p>
+</div>
+
+<div class="submit-container animate-fade-in">
+  <div class="submit-card">
+    <!-- Progress Steps -->
+    <div class="progress-steps">
+      <div class="step active">
+        <div class="step-icon">1</div>
+        <span>Project Details</span>
+      </div>
+      <div class="step-divider"></div>
+      <div class="step">
+        <div class="step-icon">2</div>
+        <span>Upload File</span>
+      </div>
+      <div class="step-divider"></div>
+      <div class="step">
+        <div class="step-icon">3</div>
+        <span>Submit</span>
+      </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="submit-form" id="projectForm">
+      <!-- Section 1: Basic Details -->
+      <div class="form-section" id="section1">
+        <div class="section-header">
+          <div class="section-icon">📝</div>
+          <h2>Project Information</h2>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">🎓</span>
+              Register Number
+            </label>
+            <div class="input-wrapper">
+              <input type="text" id="register_number" name="register_number" class="form-input" placeholder="Enter your register number" required>
+              <div class="input-highlight"></div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">📚</span>
+              Course/Department
+            </label>
+            <div class="input-wrapper">
+              <input type="text" id="course" name="course" class="form-input" placeholder="e.g., Computer Science" required>
+              <div class="input-highlight"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">
+            <span class="label-icon">💡</span>
+            Project Title
+          </label>
+          <div class="input-wrapper">
+            <input type="text" id="title" name="title" class="form-input" placeholder="Enter your amazing project title" required>
+            <div class="input-highlight"></div>
+          </div>
+          <p class="form-hint">✨ Choose a descriptive and unique title that represents your project</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">🛠️</span>
+              Technology Stack
+            </label>
+            <div class="input-wrapper">
+              <input type="text" id="technology" name="technology" class="form-input" placeholder="e.g., Python, Django, React, MySQL">
+              <div class="input-highlight"></div>
+            </div>
+            <p class="form-hint">List all technologies used in your project</p>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">👨‍🏫</span>
+              Guide Name
+            </label>
+            <div class="input-wrapper">
+              <input type="text" id="guide" name="guide" class="form-input" placeholder="Enter guide/mentor name">
+              <div class="input-highlight"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">
+            <span class="label-icon">📖</span>
+            Project Description
+          </label>
+          <div class="textarea-wrapper">
+            <textarea id="description" name="description" class="form-textarea" placeholder="Describe your project, its features, functionality, and what makes it unique..." required></textarea>
+            <div class="textarea-highlight"></div>
+          </div>
+          <p class="form-hint">📝 Provide a comprehensive description of what your project does</p>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary btn-next" onclick="nextSection()">
+            Continue to File Upload
+            <span>→</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Section 2: File Upload -->
+      <div class="form-section hidden" id="section2">
+        <div class="section-header">
+          <div class="section-icon">📁</div>
+          <h2>Upload Project Files</h2>
+        </div>
+
+        <div class="upload-area" id="dropZone">
+          <input type="file" id="project_file" name="project_file" class="file-input" accept=".zip,.rar,.pdf,.doc,.docx,.txt,.ppt,.pptx,.xls,.xlsx" onchange="handleFileSelect(event)">
+          
+          <div class="upload-content">
+            <div class="upload-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            <h3>Drag & Drop Your Project File</h3>
+            <p>or click to browse</p>
+            <div class="file-types">
+              <span class="file-type">📦 ZIP</span>
+              <span class="file-type">📄 PDF</span>
+              <span class="file-type">📝 DOC</span>
+              <span class="file-type">📊 PPT</span>
+              <span class="file-type">📈 XLS</span>
+            </div>
+          </div>
+
+          <!-- File Preview -->
+          <div class="file-preview hidden" id="filePreview">
+            <div class="file-icon-wrapper">
+              <div class="file-icon">
+                <span id="fileIcon">📦</span>
+              </div>
+              <div class="file-info">
+                <h4 id="fileName">project.zip</h4>
+                <p id="fileSize">2.5 MB</p>
+              </div>
+              <button type="button" class="remove-file" onclick="removeFile()">
+                <span>✕</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="upload-info">
+          <div class="info-item">
+            <span class="info-icon">⚡</span>
+            <span>Maximum file size: 50MB</span>
+          </div>
+          <div class="info-item">
+            <span class="info-icon">🔒</span>
+            <span>Supported formats: ZIP, RAR, PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary btn-prev" onclick="prevSection()">
+            <span>←</span>
+            Back
+          </button>
+          <button type="submit" class="btn btn-success btn-submit">
+            <span>🚀</span>
+            Submit Project
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tips Card -->
+  <div class="tips-card">
+    <div class="tips-header">
+      <h3>💡 Tips for Submission</h3>
+    </div>
+    <div class="tips-content">
+      <div class="tip-item">
+        <span class="tip-icon">✓</span>
+        <p>Include all source code in a organized folder structure</p>
+      </div>
+      <div class="tip-item">
+        <span class="tip-icon">✓</span>
+        <p>Add a README file with setup instructions</p>
+      </div>
+      <div class="tip-item">
+        <span class="tip-icon">✓</span>
+        <p>Include screenshots or demo video if applicable</p>
+      </div>
+      <div class="tip-item">
+        <span class="tip-icon">✓</span>
+        <p>Document your database schema and API endpoints</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .submit-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .submit-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border);
+  }
+
+  /* Progress Steps */
+  .progress-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 32px;
+    padding: 20px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+  }
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+  }
+
+  .step.active {
+    color: var(--primary);
+  }
+
+  .step-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    border: 2px solid var(--border);
+  }
+
+  .step.active .step-icon {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+
+  .step span {
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .step-divider {
+    width: 60px;
+    height: 2px;
+    background: var(--border);
+    margin: 0 16px;
+  }
+
+  /* Form Section */
+  .form-section {
+    transition: all 0.3s ease;
+  }
+
+  .form-section.hidden {
+    display: none;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .section-icon {
+    font-size: 28px;
+  }
+
+  .section-header h2 {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  /* Form Grid */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .form-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+  }
+
+  .label-icon {
+    font-size: 16px;
+  }
+
+  .input-wrapper {
+    position: relative;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  }
+
+  .form-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .textarea-wrapper {
+    position: relative;
+  }
+
+  .form-textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    min-height: 150px;
+    resize: vertical;
+    font-family: inherit;
+    transition: all 0.3s ease;
+  }
+
+  .form-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  }
+
+  .form-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* File Upload */
+  .upload-area {
+    position: relative;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--bg-primary);
+  }
+
+  .upload-area:hover {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.05);
+  }
+
+  .upload-area.dragover {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.1);
+    transform: scale(1.02);
+  }
+
+  .file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .upload-content {
+    pointer-events: none;
+  }
+
+  .upload-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  .upload-icon svg {
+    width: 40px;
+    height: 40px;
+    color: white;
+  }
+
+  .upload-content h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+
+  .upload-content p {
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .file-types {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .file-type {
+    padding: 4px 12px;
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  /* File Preview */
+  .file-preview {
+    margin-top: 20px;
+    padding: 16px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--success);
+  }
+
+  .file-preview.hidden {
+    display: none;
+  }
+
+  .file-icon-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .file-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--success), #10b981);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  .file-info {
+    flex: 1;
+  }
+
+  .file-info h4 {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    margin: 0 0 4px;
+  }
+
+  .file-info p {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin: 0;
+  }
+
+  .remove-file {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--danger);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .remove-file:hover {
+    transform: scale(1.1);
+  }
+
+  .upload-info {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 16px;
+    padding: 12px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+  }
+
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .info-icon {
+    font-size: 14px;
+  }
+
+  /* Buttons */
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn {
+    padding: 14px 28px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), #6366f1);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-secondary {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 2px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: var(--border);
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--success), #10b981);
+    color: white;
+  }
+
+  .btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+  }
+
+  /* Tips Card */
+  .tips-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+  }
+
+  .tips-header {
+    background: linear-gradient(135deg, var(--primary), #6366f1);
+    padding: 20px;
+  }
+
+  .tips-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .tips-content {
+    padding: 20px;
+  }
+
+  .tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .tip-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .tip-icon {
+    width: 20px;
+    height: 20px;
+    background: var(--success);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .tip-item p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .submit-container {
+      grid-template-columns: 1fr;
+    }
+    
+    .tips-card {
+      position: static;
+    }
+    
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .progress-steps {
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    
+    .step-divider {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  let selectedFile = null;
+
+  function nextSection() {
+    // Validate first section
+    const registerNumber = document.getElementById('register_number').value;
+    const course = document.getElementById('course').value;
+    const title = document.getElementById('title').value;
+    const description = document.getElementById('description').value;
+
+    if (!registerNumber || !course || !title || !description) {
+      alert('Please fill in all required fields!');
+      return;
+    }
+
+    document.getElementById('section1').classList.add('hidden');
+    document.getElementById('section2').classList.remove('hidden');
+    
+    // Update progress
+    document.querySelectorAll('.step')[1].classList.add('active');
+  }
+
+  function prevSection() {
+    document.getElementById('section2').classList.add('hidden');
+    document.getElementById('section1').classList.remove('hidden');
+    
+    // Update progress
+    document.querySelectorAll('.step')[1].classList.remove('active');
+  }
+
+  function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+      selectedFile = file;
+      showFilePreview(file);
+    }
+  }
+
+  function showFilePreview(file) {
+    const preview = document.getElementById('filePreview');
+    const content = document.querySelector('.upload-content');
+    const nameEl = document.getElementById('fileName');
+    const sizeEl = document.getElementById('fileSize');
+    const iconEl = document.getElementById('fileIcon');
+
+    // Set file info
+    nameEl.textContent = file.name;
+    sizeEl.textContent = formatFileSize(file.size);
+    
+    // Set icon based on file type
+    const ext = file.name.split('.').pop().toLowerCase();
+    const icons = {
+      'zip': '📦', 'rar': '📦',
+      'pdf': '📄',
+      'doc': '📝', 'docx': '📝',
+      'txt': '📃',
+      'ppt': '📊', 'pptx': '📊',
+      'xls': '📈', 'xlsx': '📈'
+    };
+    iconEl.textContent = icons[ext] || '📁';
+
+    preview.classList.remove('hidden');
+    content.style.display = 'none';
+  }
+
+  function removeFile() {
+    selectedFile = null;
+    document.getElementById('project_file').value = '';
+    document.getElementById('filePreview').classList.add('hidden');
+    document.querySelector('.upload-content').style.display = 'block';
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  // Drag and drop
+  const dropZone = document.getElementById('dropZone');
+  
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  });
+
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('dragover');
+  });
+
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      document.getElementById('project_file').files = e.dataTransfer.files;
+      handleFileSelect({ target: { files: [file] } });
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block body_class %}bg-home{% endblock %}
+{% block content %}
+<div class="card animate-slide-up" style="text-align: center; padding: 60px 40px;">
+  <div style="font-size: 4rem; margin-bottom: 24px;">📚</div>
+  <h1 style="font-size: 2rem; margin-bottom: 16px;">Student Project Management System</h1>
+  <p class="text-muted" style="font-size: 1.1rem; max-width: 600px; margin: 0 auto 32px;">
+    A comprehensive platform for students to submit projects, faculty to review submissions, and administrators to manage the entire process efficiently.
+  </p>
+  
+  {% if session.user_id %}
+  <div class="d-flex justify-center gap-3" style="justify-content: center; flex-wrap: wrap;">
+    <a href="/dashboard" class="btn btn-primary btn-lg">
+      <span>📊</span> Go to Dashboard
+    </a>
+    <a href="/logout" class="btn btn-secondary btn-lg">
+      <span>🚪</span> Logout
+    </a>
+  </div>
+  {% else %}
+  <div class="d-flex justify-center gap-3" style="justify-content: center; flex-wrap: wrap;">
+    <a href="/login" class="btn btn-primary btn-lg">
+      <span>🔐</span> Login to Continue
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<div class="stats-grid animate-fade-in" style="margin-top: 48px;">
+  <div class="stat-card">
+    <div class="stat-icon primary">👨‍🎓</div>
+    <div class="stat-content">
+      <h3>Students</h3>
+      <p>Submit & track projects</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon success">👨‍🏫</div>
+    <div class="stat-content">
+      <h3>Faculty</h3>
+      <p>Review & grade submissions</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon warning">⚙️</div>
+    <div class="stat-content">
+      <h3>Admins</h3>
+      <p>Manage users & system</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

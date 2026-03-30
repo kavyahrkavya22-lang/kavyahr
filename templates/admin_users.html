@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header animate-fade-in">
+  <h1 class="page-title">Manage Users</h1>
+  <p class="page-subtitle">Add, edit, and manage system users</p>
+</div>
+
+<div class="card animate-fade-in">
+  <div class="card-header">
+    <h2>Create New User</h2>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="name">Full Name</label>
+          <input type="text" id="name" name="name" class="form-input" placeholder="Enter full name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input type="email" id="email" name="email" class="form-input" placeholder="Enter email" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="role">Role</label>
+          <select id="role" name="role" class="form-select" required>
+            <option value="student">Student</option>
+            <option value="faculty">Faculty</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input type="password" id="password" name="password" class="form-input" placeholder="Enter password" required>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">
+        <span>➕</span> Create User
+      </button>
+    </form>
+  </div>
+</div>
+
+<h2 class="mt-4 mb-2 animate-fade-in">Existing Users</h2>
+<div class="table-container animate-fade-in">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for u in users %}
+      <tr>
+        <td><strong>{{ u.name }}</strong></td>
+        <td>{{ u.email }}</td>
+        <td>
+          <span class="badge {% if u.role == 'admin' %}badge-danger{% elif u.role == 'faculty' %}badge-primary{% else %}badge-info{% endif %}">
+            {{ u.role|title }}
+          </span>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-secondary">Edit</button>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header animate-fade-in">
+  <h1 class="page-title">Edit Faculty Assignment</h1>
+  <p class="page-subtitle">Manage students assigned to {{ faculty.name }}</p>
+</div>
+
+<div class="card animate-fade-in">
+  <div class="card-header">
+    <h2>Assign Students to {{ faculty.name }}</h2>
+  </div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="form-group">
+        <label class="form-label">Select Students to Assign</label>
+        <p class="form-hint mb-3">Select multiple students by holding Ctrl/Cmd key</p>
+        <select name="assigned_students" class="form-select" multiple size="10" style="min-height: 200px;">
+          {% for student in students %}
+            <option value="{{ student._id }}" {% if student._id in faculty.assigned_students %}selected{% endif %}>
+              {{ student.name }} ({{ student.email }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="d-flex gap-2 mt-3">
+        <button type="submit" class="btn btn-primary">
+          <span>💾</span> Save Assignment
+        </button>
+        <a href="/dashboard" class="btn btn-secondary">
+          <span>←</span> Back to Dashboard
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

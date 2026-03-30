@@ -1,0 +1,611 @@
+{% extends 'base.html' %}
+{% block body_class %}bg-faculty{% endblock %}
+{% block content %}
+<div class="page-header animate-fade-in">
+  <h1 class="page-title">Faculty Dashboard</h1>
+  <p class="page-subtitle">Review and manage student project submissions</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid animate-fade-in">
+  <div class="stat-card">
+    <div class="stat-icon primary">📁</div>
+    <div class="stat-content">
+      <h3>{{ projects|length }}</h3>
+      <p>Total Projects</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon info">⏳</div>
+    <div class="stat-content">
+      <h3>{{ projects|selectattr('status', 'equalto', 'Pending')|list|length }}</h3>
+      <p>Pending Reviews</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon success">✓</div>
+    <div class="stat-content">
+      <h3>{{ projects|selectattr('status', 'equalto', 'Approved')|list|length }}</h3>
+      <p>Approved</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon warning">📝</div>
+    <div class="stat-content">
+      <h3>{{ projects|selectattr('status', 'equalto', 'Needs Revision')|list|length }}</h3>
+      <p>Needs Revision</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon danger">✗</div>
+    <div class="stat-content">
+      <h3>{{ projects|selectattr('status', 'equalto', 'Rejected')|list|length }}</h3>
+      <p>Rejected</p>
+    </div>
+  </div>
+</div>
+
+<!-- Projects Table -->
+<h2 class="section-title animate-fade-in">
+  <span>📋</span> Student Project Submissions
+</h2>
+
+<div class="table-card animate-fade-in">
+  <table class="faculty-table">
+    <thead>
+      <tr>
+        <th class="text-left">Student Details</th>
+        <th class="text-left">Project Info</th>
+        <th class="text-center">Status</th>
+        <th class="text-center">Marks</th>
+        <th class="text-left">Feedback</th>
+        <th class="text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for p in projects %}
+      <tr class="{% if p.status == 'Pending' %}pending-row{% endif %}">
+        <!-- Student Details -->
+        <td>
+          <div class="student-info">
+            <div class="student-avatar">{{ p.student_name[0]|upper }}</div>
+            <div class="student-details">
+              <strong>{{ p.student_name }}</strong>
+              <span>{{ p.register_number }}</span>
+              <small>{{ p.course }}</small>
+            </div>
+          </div>
+        </td>
+        
+        <!-- Project Info -->
+        <td>
+          <div class="project-info">
+            <strong>{{ p.title }}</strong>
+            <div class="project-meta">
+              {% if p.technology %}
+                <span class="tag">{{ p.technology }}</span>
+              {% endif %}
+              {% if p.guide %}
+                <span class="guide-tag">Guide: {{ p.guide }}</span>
+              {% endif %}
+            </div>
+          </div>
+        </td>
+        
+        <!-- Status -->
+        <td class="text-center">
+          <span class="status-badge status-{{ p.status|lower|replace(' ', '-') }}">
+            {% if p.status == 'Approved' %}✓{% elif p.status == 'Rejected' %}✗{% elif p.status == 'Needs Revision' %}⚠{% else %}⏳{% endif %}
+            {{ p.status }}
+          </span>
+        </td>
+        
+        <!-- Marks -->
+        <td class="text-center">
+          {% if p.marks is not none %}
+            <span class="marks-display {% if p.marks is not none and p.marks|int >= 70 %}marks-good{% elif p.marks is not none and p.marks|int >= 40 %}marks-avg{% elif p.marks is not none %}marks-low{% endif %}">
+              {{ p.marks }}
+            </span>
+          {% else %}
+            <span class="marks-pending">-</span>
+          {% endif %}
+        </td>
+        
+        <!-- Feedback -->
+        <td>
+          {% if p.feedback %}
+            <div class="feedback-display" title="{{ p.feedback }}">
+              {{ p.feedback[:50] }}{% if p.feedback|length > 50 %}...{% endif %}
+            </div>
+          {% else %}
+            <span class="feedback-empty">No feedback yet</span>
+          {% endif %}
+        </td>
+        
+        <!-- Actions -->
+        <td class="text-center">
+          <div class="action-buttons">
+            {% if p.project_file %}
+              <a href="{{ p.project_file }}" class="btn btn-download" title="Download Project File" download target="_blank">
+                <span>⬇️</span>
+              </a>
+            {% endif %}
+            {% if p.status == 'Pending' or p.status == 'Needs Revision' %}
+              <form action="/review/{{ p._id }}" method="POST" class="action-form">
+                <input type="hidden" name="status" value="Approved">
+                <input type="hidden" name="feedback" value="Project approved by faculty">
+                <button type="submit" class="btn btn-accept" title="Accept Project">
+                  <span>✓</span>
+                </button>
+              </form>
+              <button type="button" class="btn btn-reject" onclick="showRejectModal('{{ p._id }}', '{{ p.title|replace("'", "\\'")|safe }}')" title="Reject Project">
+                <span>✗</span>
+              </button>
+              <a href="/review/{{ p._id }}" class="btn btn-view" title="Full Review">
+                <span>📝</span>
+              </a>
+            {% else %}
+              <a href="/review/{{ p._id }}" class="btn btn-view" title="View Details">
+                <span>👁</span>
+              </a>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+    {% else %}
+      <tr>
+        <td colspan="6" class="empty-row">
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3>No Projects Submitted</h3>
+            <p>No student projects have been submitted yet.</p>
+          </div>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Reject Modal -->
+<div id="rejectModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3><span>✗</span> Reject Project</h3>
+      <span class="close-btn" onclick="closeRejectModal()">&times;</span>
+    </div>
+    <div class="modal-body">
+      <div class="modal-project-info">
+        <strong>Project:</strong> <span id="rejectProjectTitle"></span>
+      </div>
+      <form id="rejectForm" action="" method="POST">
+        <input type="hidden" name="status" value="Rejected">
+        <div class="form-group">
+          <label class="form-label">Reason for Rejection (Describe the issues):</label>
+          <textarea id="rejectReason" name="feedback" class="form-textarea" rows="4" placeholder="Please describe the issues with this project..." required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-reject">
+            <span>✗</span> Confirm Rejection
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="closeRejectModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 32px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.faculty-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.faculty-table th {
+  background: var(--bg-primary);
+  padding: 16px 20px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border);
+}
+
+.faculty-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.faculty-table tr:last-child td {
+  border-bottom: none;
+}
+
+.faculty-table tr:hover {
+  background: var(--bg-primary);
+}
+
+.pending-row {
+  background: rgba(79, 70, 229, 0.03);
+}
+
+.pending-row:hover {
+  background: rgba(79, 70, 229, 0.08);
+}
+
+/* Student Info */
+.student-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.student-avatar {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.student-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.student-details strong {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.student-details span {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.student-details small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* Project Info */
+.project-info strong {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.project-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.guide-tag {
+  color: var(--primary);
+  font-size: 0.75rem;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-approved {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+
+.status-rejected {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
+.status-pending {
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--info);
+}
+
+.status-needs-revision {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+}
+
+/* Marks Display */
+.marks-display {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.marks-good {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+
+.marks-avg {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+}
+
+.marks-low {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
+.marks-pending {
+  color: var(--text-muted);
+}
+
+/* Feedback */
+.feedback-display {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feedback-empty {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-accept {
+  background: var(--success);
+  color: white;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.btn-accept:hover {
+  background: #059669;
+  transform: scale(1.05);
+}
+
+.btn-reject {
+  background: var(--danger);
+  color: white;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.btn-reject:hover {
+  background: #dc2626;
+  transform: scale(1.05);
+}
+
+.btn-view {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  transition: var(--transition);
+}
+
+.btn-view:hover {
+  background: var(--border);
+}
+
+.btn-download {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  transition: var(--transition);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.btn-download:hover {
+  background: #4f46e5;
+  transform: scale(1.05);
+}
+
+/* Empty State */
+.empty-row td {
+  padding: 60px 20px;
+}
+
+.empty-state {
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.empty-state h3 {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.empty-state p {
+  color: var(--text-secondary);
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  max-width: 500px;
+  width: 90%;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.close-btn {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.close-btn:hover {
+  color: var(--text-primary);
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-project-info {
+  background: var(--bg-primary);
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  color: var(--text-secondary);
+}
+
+.modal-project-info span {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* Text utilities */
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+</style>
+
+<script>
+function showRejectModal(projectId, projectTitle) {
+  document.getElementById('rejectProjectTitle').textContent = projectTitle;
+  document.getElementById('rejectForm').action = '/review/' + projectId;
+  document.getElementById('rejectModal').classList.add('show');
+}
+
+function closeRejectModal() {
+  document.getElementById('rejectModal').classList.remove('show');
+  document.getElementById('rejectReason').value = '';
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById('rejectModal');
+  if (event.target === modal) {
+    closeRejectModal();
+  }
+}
+</script>
+{% endblock %}

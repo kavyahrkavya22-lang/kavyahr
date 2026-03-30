@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block body_class %}bg-signup{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  const password = document.querySelector('#password');
+  const confirmPassword = document.querySelector('#confirm_password');
+  
+  if (form && password && confirmPassword) {
+    form.addEventListener('submit', function(e) {
+      if (password.value !== confirmPassword.value) {
+        e.preventDefault();
+        alert('Passwords do not match!');
+        confirmPassword.focus();
+        return false;
+      }
+      if (password.value.length < 6) {
+        e.preventDefault();
+        alert('Password must be at least 6 characters!');
+        password.focus();
+        return false;
+      }
+    });
+  }
+});
+</script>
+{% endblock %}
+{% block content %}
+<div class="login-page">
+  <div class="login-container">
+    <div class="login-card animate-slide-up">
+      <div class="login-header">
+        <div class="login-logo">📚</div>
+        <h1>Create Account</h1>
+        <p>Join Student Project Management System</p>
+      </div>
+      <form method="post" class="login-form" id="signup-form">
+        <div class="form-group">
+          <label class="form-label" for="name">Full Name</label>
+          <input type="text" id="name" name="name" class="form-input" placeholder="Enter your full name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input type="password" id="password" name="password" class="form-input" placeholder="Create a password" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="confirm_password">Confirm Password</label>
+          <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="Confirm your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg btn-block">
+          <span>✍️</span> Sign Up
+        </button>
+      </form>
+      <div class="login-footer">
+        <p>Already have an account? <a href="{{ url_for('login') }}">Sign In</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

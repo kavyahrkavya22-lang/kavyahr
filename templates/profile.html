@@ -1,0 +1,349 @@
+{% extends 'base.html' %}
+{% block body_class %}bg-profile{% endblock %}
+{% block content %}
+<div class="page-header animate-fade-in">
+  <h1 class="page-title">My Profile</h1>
+  <p class="page-subtitle">View and manage your profile information and statistics</p>
+</div>
+
+<div class="grid-2 animate-fade-in">
+  <!-- Profile Information Card -->
+  <div class="card">
+    <div class="card-header">
+      <h2>👤 Profile Information</h2>
+    </div>
+    <div class="card-body">
+      <form action="/profile" method="POST">
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input type="text" name="name" class="form-input" value="{{ user.name }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" value="{{ user.email }}" disabled>
+          <small class="form-hint">Email cannot be changed</small>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <input type="text" class="form-input" value="{{ user.role|title }}" disabled>
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password (leave blank to keep current)</label>
+          <input type="password" name="new_password" class="form-input" placeholder="Enter new password">
+        </div>
+        <button type="submit" class="btn btn-primary">
+          <span>💾</span> Update Profile
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Statistics Card -->
+  <div class="card">
+    <div class="card-header">
+      <h2>📊 My Statistics</h2>
+    </div>
+    <div class="card-body">
+      {% if user.role == 'student' %}
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon primary">📁</div>
+            <div class="stat-content">
+              <h3>{{ stats.total_projects }}</h3>
+              <p>Total Projects</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon info">📤</div>
+            <div class="stat-content">
+              <h3>{{ stats.submitted }}</h3>
+              <p>Submitted</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon success">✓</div>
+            <div class="stat-content">
+              <h3>{{ stats.approved }}</h3>
+              <p>Approved</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon danger">✗</div>
+            <div class="stat-content">
+              <h3>{{ stats.rejected }}</h3>
+              <p>Rejected</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Bar Chart for Students -->
+        <div class="chart-container mt-4">
+          <h3 class="chart-title">Project Status Overview</h3>
+          <div class="bar-chart">
+            {% set total = stats.total_projects if stats.total_projects > 0 else 1 %}
+            <div class="bar-item">
+              <div class="bar-label">Submitted</div>
+              <div class="bar-wrapper">
+                <div class="bar bar-info" style="width: {{ (stats.submitted / total * 100)|round|int }}%">
+                  <span class="bar-value">{{ stats.submitted }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="bar-item">
+              <div class="bar-label">Approved</div>
+              <div class="bar-wrapper">
+                <div class="bar bar-success" style="width: {{ (stats.approved / total * 100)|round|int }}%">
+                  <span class="bar-value">{{ stats.approved }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="bar-item">
+              <div class="bar-label">Rejected</div>
+              <div class="bar-wrapper">
+                <div class="bar bar-danger" style="width: {{ (stats.rejected / total * 100)|round|int }}%">
+                  <span class="bar-value">{{ stats.rejected }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      {% elif user.role == 'faculty' %}
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon primary">👨‍🎓</div>
+            <div class="stat-content">
+              <h3>{{ stats.assigned_students }}</h3>
+              <p>Assigned Students</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon info">📁</div>
+            <div class="stat-content">
+              <h3>{{ stats.total_reviews }}</h3>
+              <p>Total Reviews</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon warning">⏳</div>
+            <div class="stat-content">
+              <h3>{{ stats.pending }}</h3>
+              <p>Pending</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon success">✓</div>
+            <div class="stat-content">
+              <h3>{{ stats.reviewed }}</h3>
+              <p>Reviewed</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bar Chart for Faculty -->
+        <div class="chart-container mt-4">
+          <h3 class="chart-title">Review Statistics</h3>
+          <div class="bar-chart">
+            {% set total = stats.total_reviews if stats.total_reviews > 0 else 1 %}
+            <div class="bar-item">
+              <div class="bar-label">Pending</div>
+              <div class="bar-wrapper">
+                <div class="bar bar-warning" style="width: {{ (stats.pending / total * 100)|round|int }}%">
+                  <span class="bar-value">{{ stats.pending }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="bar-item">
+              <div class="bar-label">Reviewed</div>
+              <div class="bar-wrapper">
+                <div class="bar bar-success" style="width: {{ (stats.reviewed / total * 100)|round|int }}%">
+                  <span class="bar-value">{{ stats.reviewed }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      {% elif user.role == 'admin' %}
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon primary">👥</div>
+            <div class="stat-content">
+              <h3>{{ stats.total_users }}</h3>
+              <p>Total Users</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon info">👨‍🎓</div>
+            <div class="stat-content">
+              <h3>{{ stats.total_students }}</h3>
+              <p>Students</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon success">👨‍🏫</div>
+            <div class="stat-content">
+              <h3>{{ stats.total_faculty }}</h3>
+              <p>Faculty</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon warning">📁</div>
+            <div class="stat-content">
+              <h3>{{ stats.total_projects }}</h3>
+              <p>Total Projects</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bar Chart for Admin -->
+        <div class="chart-container mt-4">
+          <h3 class="chart-title">System Overview</h3>
+          <div class="bar-chart">
+            {% set total = stats.total_users if stats.total_users > 0 else 1 %}
+            <div class="bar-item">
+              <div class="bar-label">Students</div>
+              <div class="bar-wrapper">
+                <div class="bar bar-info" style="width: {{ (stats.total_students / total * 100)|round|int }}%">
+                  <span class="bar-value">{{ stats.total_students }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="bar-item">
+              <div class="bar-label">Faculty</div>
+              <div class="bar-wrapper">
+                <div class="bar bar-success" style="width: {{ (stats.total_faculty / total * 100)|round|int }}%">
+                  <span class="bar-value">{{ stats.total_faculty }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="bar-item">
+              <div class="bar-label">Projects</div>
+              <div class="bar-wrapper">
+                <div class="bar bar-warning" style="width: {{ (stats.total_projects / total * 100)|round|int }}%">
+                  <span class="bar-value">{{ stats.total_projects }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Recent Projects Section -->
+{% if projects %}
+<div class="card mt-4 animate-fade-in">
+  <div class="card-header">
+    <h2>📋 Recent Projects</h2>
+  </div>
+  <div class="card-body">
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Project Title</th>
+            <th>Status</th>
+            <th>Marks</th>
+            <th>Submitted On</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in projects[:5] %}
+          <tr>
+            <td>{{ p.title }}</td>
+            <td>
+              <span class="badge badge-{{ 'success' if p.status == 'Approved' else 'danger' if p.status == 'Rejected' else 'warning' if p.status == 'Needs Revision' else 'info' }}">
+                {{ p.status }}
+              </span>
+            </td>
+            <td>{{ p.marks if p.marks is not none else '-' }}</td>
+            <td>{{ p._id.generation_time.strftime('%Y-%m-%d') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<style>
+  .chart-container {
+    padding: 20px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+  }
+  
+  .chart-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+  }
+  
+  .bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .bar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .bar-label {
+    min-width: 80px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+  
+  .bar-wrapper {
+    flex: 1;
+    height: 28px;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .bar {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+  
+  .bar-success {
+    background: linear-gradient(90deg, var(--success), #10b981);
+  }
+  
+  .bar-danger {
+    background: linear-gradient(90deg, var(--danger), #ef4444);
+  }
+  
+  .bar-warning {
+    background: linear-gradient(90deg, var(--warning), #f59e0b);
+  }
+  
+  .bar-info {
+    background: linear-gradient(90deg, var(--info), #06b6d4);
+  }
+  
+  .bar-primary {
+    background: linear-gradient(90deg, var(--primary), #6366f1);
+  }
+  
+  .bar-value {
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+</style>
+{% endblock %}

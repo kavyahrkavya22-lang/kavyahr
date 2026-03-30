@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block body_class %}bg-login{% endblock %}
+{% block content %}
+<div class="login-page">
+  <div class="login-container">
+    <div class="login-card animate-slide-up">
+      <div class="login-header">
+        <div class="login-logo">📚</div>
+        <h1>Welcome Back</h1>
+        <p>Sign in to Student Project Management System</p>
+      </div>
+      <form method="post" class="login-form">
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg btn-block">
+          <span>🔐</span> Sign In
+        </button>
+      </form>
+      <div class="login-footer">
+        <p>Don't have an account? <a href="{{ url_for('signup') }}">Sign Up</a></p>
+        <p class="system-name">Student Project Management System</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
